@@ -65,8 +65,8 @@ jobs:
     - name: Build and Push Docker Image
       uses: docker/build-push-action@v2
       with:
-        context: ./src/
-        file: ./src/Dockerfile
+        context: ./activemq-artemis/src/
+        file: ./activemq-artemis/src/Dockerfile
         pull: true
         push: true
         build-args: ACTIVEMQ_ARTEMIS_VERSION=2.17.0
