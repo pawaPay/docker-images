@@ -23,4 +23,4 @@ docker build --builder-arg ACTIVEMQ_ARTEMIS_VERSION=2.17.0 -t activemq-artemis-d
 
 ## Building through pipeline
 
-We have setup Github Actions for building the image and pushing to our Dockerhub, if you wish to change anything, you can update the Dockerfile or if you update the version of ActiveMQ Artemis, update the workflow file to update the ARG `ACTIVEMQ_ARTEMIS_VERSION` and create a PR, which will build the image, once successful, you can merge the PR and it will create a tag incrementing the patch version. If you wish to update the minor version e.g. when updating `ACTIVEMQ_ARTEMIS_VERSION`, you can update the `DEFAULT_BUMP:` to `minor` in `.github/workflows/master.yaml` at the 2 places.
+We have setup Github Actions for building the image and pushing to our Dockerhub, if you wish to change anything, you can update the Dockerfile or if you update the version of ActiveMQ Artemis, update the workflow file to update the ARG `ACTIVEMQ_ARTEMIS_VERSION` and `IMAGE_VERSION` in workflow files and create a PR, which will build the image, once successful, you can merge the PR and it will create a tag based on the app-name & `IMAGE_VERSION`. 
