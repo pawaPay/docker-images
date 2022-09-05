@@ -1,36 +1,32 @@
-name: Build on Develop for ActiveMQ
+name: Build on PR for ActiveMQ Artemis
 
 on:
-  push:
-    branches:
-      - develop
+  pull_request:
     paths:
-    - 'activemq/**'
-    - '.github/workflows/activemq-develop.yml'
+    - 'activemq-artemis/**'
+    - '.github/workflows/activemq-artemis-pr.yml'
 
 jobs:
-  Build-and-Deploy:
+  Build-and-Push-Image:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     name: Build and Push Image to Image registry
     env:
       REGISTRY: docker.io
-      ACTIVEMQ_VERSION: "5.17.1"
     defaults:
       run:
         shell: bash
     steps:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
 
     - name: Generate Vars
       id: generate_vars
       run: |
-        IMAGE_TAG=v$ACTIVEMQ_VERSION
+        # Just Tag
+        IMAGE_TAG=pr-${{ github.event.pull_request.number }}-$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-8)
         # Just Image name
-        IMAGE_NAME=pawapay/activemq
+        IMAGE_NAME=pawapay/activemq-artemis
         #Image ID= Name + Tag
         IMAGE_ID=$IMAGE_NAME:$IMAGE_TAG
         IMAGE_REPO=$REGISTRY/$IMAGE_ID
@@ -57,28 +53,31 @@ jobs:
         echo "Image from Env:  ${{ env.IMAGE }}"
         echo "Repo from Env:  ${{ env.REPO }}"
 
-    - name: Build and Push Docker Image
+    - name: Build and Push Docker Image for Debian
       uses: docker/build-push-action@v2
       with:
-        context: ./activemq/
-        file: ./activemq/Dockerfile
+        context: ./activemq-artemis/src/
+        file: ./activemq-artemis/src/Dockerfile
         pull: true
         push: true
-        build-args: ACTIVEMQ_VERSION=${{ env.ACTIVEMQ_VERSION }}
+        build-args: ACTIVEMQ_ARTEMIS_VERSION=2.17.0
         cache-to: type=inline
         tags: ${{ env.IMAGE }}
         platforms: linux/amd64,linux/arm64
 
-    - name: Bump version and push tag
-      id: tag_version
-      uses: mathieudutour/github-tag-action@v6.0
+    - name: Comment on PR
+      uses: mshick/add-pr-comment@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        custom_tag: "v${{ env.ACTIVEMQ_VERSION }}"
-        tag_prefix: "activemq-"
-    - name: Create a GitHub release
-      uses: ncipollo/release-action@v1
+        message: '@${{ github.actor }} Image is available for testing. `docker pull ${{ env.IMAGE }}`'
+        allow-repeats: false
+
+    - name: Notify Failure
+      if: failure()
+      uses: mshick/add-pr-comment@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag: ${{ steps.tag_version.outputs.new_tag }}
-        name: ${{ steps.tag_version.outputs.new_tag }}
-        body: ${{ steps.tag_version.outputs.changelog }}
+        message: '@${{ github.actor }} The pipeline failed! You better fix it before anyone else finds out! [Build](https://github.com/${{ github.repository }}/commit/${{ github.event.pull_request.head.sha }}/checks) has Failed!'
+        allow-repeats: false

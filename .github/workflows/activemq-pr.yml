@@ -1,10 +1,10 @@
-name: Build on PR for ActiveMQ Artemis
+name: Build on PR for ActiveMQ
 
 on:
   pull_request:
     paths:
-    - 'activemq-artemis/**'
-    - '.github/workflows/**'
+    - 'activemq/**'
+    - '.github/workflows/activemq-pr.yml'
 
 jobs:
   Build-and-Push-Image:
@@ -13,6 +13,7 @@ jobs:
     name: Build and Push Image to Image registry
     env:
       REGISTRY: docker.io
+      ACTIVEMQ_VERSION: "5.17.1"
     defaults:
       run:
         shell: bash
@@ -26,7 +27,7 @@ jobs:
         # Just Tag
         IMAGE_TAG=pr-${{ github.event.pull_request.number }}-$(echo ${{ github.event.pull_request.head.sha }} | cut -c1-8)
         # Just Image name
-        IMAGE_NAME=pawapay/activemq-artemis
+        IMAGE_NAME=pawapay/activemq
         #Image ID= Name + Tag
         IMAGE_ID=$IMAGE_NAME:$IMAGE_TAG
         IMAGE_REPO=$REGISTRY/$IMAGE_ID
@@ -56,11 +57,11 @@ jobs:
     - name: Build and Push Docker Image for Debian
       uses: docker/build-push-action@v2
       with:
-        context: ./activemq-artemis/src/
-        file: ./activemq-artemis/src/Dockerfile
+        context: ./activemq/
+        file: ./activemq/Dockerfile
         pull: true
         push: true
-        build-args: ACTIVEMQ_ARTEMIS_VERSION=2.17.0
+        build-args: ACTIVEMQ_VERSION=${{ env.ACTIVEMQ_VERSION }}
         cache-to: type=inline
         tags: ${{ env.IMAGE }}
         platforms: linux/amd64,linux/arm64
