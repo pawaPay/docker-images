@@ -15,7 +15,7 @@ jobs:
     name: Build and Push Image to Image registry
     env:
       REGISTRY: docker.io
-      ACTIVEMQ_VERSION: "v5.17.1"
+      ACTIVEMQ_VERSION: "5.17.1"
     defaults:
       run:
         shell: bash
@@ -28,7 +28,7 @@ jobs:
     - name: Generate Vars
       id: generate_vars
       run: |
-        IMAGE_TAG=$ACTIVEMQ_VERSION
+        IMAGE_TAG=v$ACTIVEMQ_VERSION
         # Just Image name
         IMAGE_NAME=pawapay/activemq
         #Image ID= Name + Tag
@@ -74,7 +74,7 @@ jobs:
       uses: mathieudutour/github-tag-action@v6.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        custom_tag: ${{ env.ACTIVEMQ_VERSION }}
+        custom_tag: "v${{ env.ACTIVEMQ_VERSION }}"
         tag_prefix: "activemq-"
     - name: Create a GitHub release
       uses: ncipollo/release-action@v1
