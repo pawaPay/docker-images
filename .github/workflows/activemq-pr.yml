@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
     - 'activemq/**'
-    - '.github/workflows/**'
+    - '.github/workflows/activemq-pr.yml'
 
 jobs:
   Build-and-Push-Image:

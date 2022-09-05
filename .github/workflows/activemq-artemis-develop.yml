@@ -6,7 +6,7 @@ on:
       - develop
     paths:
     - 'activemq-artemis/**'
-    - '.github/workflows/**'
+    - '.github/workflows/activemq-artemis-develop.yml'
 
 jobs:
   Build-and-Deploy:
